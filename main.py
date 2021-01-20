@@ -99,11 +99,11 @@ def main():
     if not args.distributed:
         if args.arch.startswith('alexnet') or args.arch.startswith('vgg'):
             model.features = torch.nn.DataParallel(model.features)
-            model.cuda()
+            model.to(lib.get_dev())
         else:
-            model = torch.nn.DataParallel(model).cuda()
+            model = torch.nn.DataParallel(model).to(lib.get_dev())
     else:
-        model.cuda()
+        model.to(lib.get_dev())
         model = torch.nn.parallel.DistributedDataParallel(model)
 
 
@@ -146,11 +146,11 @@ def main():
     # define lemniscate and loss function (criterion)
     ndata = train_dataset.__len__()
     if args.nce_k > 0:
-        lemniscate = NCEAverage(args.low_dim, ndata, args.nce_k, args.nce_t, args.nce_m).cuda()
-        criterion = NCECriterion(ndata).cuda()
+        lemniscate = NCEAverage(args.low_dim, ndata, args.nce_k, args.nce_t, args.nce_m, None, lib.get_dev()).to(lib.get_dev())
+        criterion = NCECriterion(ndata).to(lib.get_dev())
     else:
-        lemniscate = LinearAverage(args.low_dim, ndata, args.nce_t, args.nce_m).cuda()
-        criterion = nn.CrossEntropyLoss().cuda()
+        lemniscate = LinearAverage(args.low_dim, ndata, args.nce_t, args.nce_m).to(lib.get_dev())
+        criterion = nn.CrossEntropyLoss().to(lib.get_dev())
 
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
@@ -217,7 +217,8 @@ def train(train_loader, model, lemniscate, criterion, optimizer, epoch):
         # measure data loading time
         data_time.update(time.time() - end)
 
-        index = index.cuda(async=True)
+        #index = index.cuda(async=True)
+        index = index.to(lib.get_dev())
 
         # compute output
         feature = model(input)

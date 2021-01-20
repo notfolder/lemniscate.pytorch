@@ -1,0 +1,16 @@
+FROM hirano/lemniscate:latest
+
+RUN apt-get install -y ssh
+ADD sshd_config /etc/ssh
+RUN mkdir /var/run/sshd
+
+RUN mkdir -p /root/.ssh
+ADD authorized_keys /root/.ssh/authorized_keys
+RUN chmod 700 /root/.ssh
+#COPY .profile /root/
+
+#CMD ["/bin/bash"]
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
+

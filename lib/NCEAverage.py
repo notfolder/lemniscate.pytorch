@@ -24,7 +24,8 @@ class NCEFunction(Function):
         weight.resize_(batchSize, K+1, inputSize)
 
         # inner product
-        out = torch.bmm(weight, x.data.resize_(batchSize, inputSize, 1))
+        #out = torch.bmm(weight, x.data.resize_(batchSize, inputSize, 1))
+        out = torch.bmm(weight, x.reshape(batchSize, inputSize, 1))
         out.div_(T).exp_() # batchSize * self.K+1
         x.data.resize_(batchSize, inputSize)
 
@@ -53,7 +54,7 @@ class NCEFunction(Function):
         # add temperature
         gradOutput.data.div_(T)
 
-        gradOutput.data.resize_(batchSize, 1, K+1)
+        gradOutput = gradOutput.reshape(batchSize, 1, K+1)
         
         # gradient of linear
         gradInput = torch.bmm(gradOutput.data, weight)
@@ -71,12 +72,12 @@ class NCEFunction(Function):
 
 class NCEAverage(nn.Module):
 
-    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, Z=None):
+    def __init__(self, inputSize, outputSize, K, T=0.07, momentum=0.5, Z=None, device=None):
         super(NCEAverage, self).__init__()
         self.nLem = outputSize
         self.unigrams = torch.ones(self.nLem)
         self.multinomial = AliasMethod(self.unigrams)
-        self.multinomial.cuda()
+        self.multinomial.to_dev(device)
         self.K = K
 
         self.register_buffer('params',torch.tensor([K, T, -1, momentum]));

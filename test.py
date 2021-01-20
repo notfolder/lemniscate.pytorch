@@ -4,6 +4,7 @@ import datasets
 from lib.utils import AverageMeter
 import torchvision.transforms as transforms
 import numpy as np
+import lib
 
 def NN(epoch, net, lemniscate, trainloader, testloader, recompute_memory=0):
     net.eval()
@@ -16,28 +17,30 @@ def NN(epoch, net, lemniscate, trainloader, testloader, recompute_memory=0):
 
     trainFeatures = lemniscate.memory.t()
     if hasattr(trainloader.dataset, 'imgs'):
-        trainLabels = torch.LongTensor([y for (p, y) in trainloader.dataset.imgs]).cuda()
+        trainLabels = torch.LongTensor([y for (p, y) in trainloader.dataset.imgs]).to(lib.get_dev())
     else:
-        trainLabels = torch.LongTensor(trainloader.dataset.train_labels).cuda()
+        trainLabels = torch.LongTensor(trainloader.dataset.train_labels).to(lib.get_dev())
 
     if recompute_memory:
         transform_bak = trainloader.dataset.transform
         trainloader.dataset.transform = testloader.dataset.transform
         temploader = torch.utils.data.DataLoader(trainloader.dataset, batch_size=100, shuffle=False, num_workers=1)
         for batch_idx, (inputs, targets, indexes) in enumerate(temploader):
-            targets = targets.cuda(async=True)
+            #targets = targets.cuda(async=True)
+            targets = targets.to(lib.get_dev())
             batchSize = inputs.size(0)
-            features = net(inputs)
+            features = net(inputs.to(lib.get_dev()))
             trainFeatures[:, batch_idx*batchSize:batch_idx*batchSize+batchSize] = features.data.t()
-        trainLabels = torch.LongTensor(temploader.dataset.train_labels).cuda()
+        trainLabels = torch.LongTensor(temploader.dataset.train_labels).to(lib.get_dev())
         trainloader.dataset.transform = transform_bak
     
     end = time.time()
     with torch.no_grad():
         for batch_idx, (inputs, targets, indexes) in enumerate(testloader):
-            targets = targets.cuda(async=True)
+            #targets = targets.cuda(async=True)
+            targets = targets.to(lib.get_dev())
             batchSize = inputs.size(0)
-            features = net(inputs)
+            features = net(inputs.to(lib.get_dev()))
             net_time.update(time.time() - end)
             end = time.time()
 
@@ -73,9 +76,10 @@ def kNN(epoch, net, lemniscate, trainloader, testloader, K, sigma, recompute_mem
 
     trainFeatures = lemniscate.memory.t()
     if hasattr(trainloader.dataset, 'imgs'):
-        trainLabels = torch.LongTensor([y for (p, y) in trainloader.dataset.imgs]).cuda()
+        trainLabels = torch.LongTensor([y for (p, y) in trainloader.dataset.imgs]).to(lib.get_dev())
     else:
-        trainLabels = torch.LongTensor(trainloader.dataset.train_labels).cuda()
+        #trainLabels = torch.LongTensor(trainloader.dataset.train_labels).to(lib.get_dev())
+        trainLabels = torch.LongTensor(trainloader.dataset.targets).to(lib.get_dev())
     C = trainLabels.max() + 1
 
     if recompute_memory:
@@ -83,23 +87,25 @@ def kNN(epoch, net, lemniscate, trainloader, testloader, K, sigma, recompute_mem
         trainloader.dataset.transform = testloader.dataset.transform
         temploader = torch.utils.data.DataLoader(trainloader.dataset, batch_size=100, shuffle=False, num_workers=1)
         for batch_idx, (inputs, targets, indexes) in enumerate(temploader):
-            targets = targets.cuda(async=True)
+            #targets = targets.cuda(async=True)
+            targets = targets.to(lib.get_dev())
             batchSize = inputs.size(0)
-            features = net(inputs)
+            features = net(inputs.to(lib.get_dev()))
             trainFeatures[:, batch_idx*batchSize:batch_idx*batchSize+batchSize] = features.data.t()
-        trainLabels = torch.LongTensor(temploader.dataset.train_labels).cuda()
+        trainLabels = torch.LongTensor(temploader.dataset.train_labels).to(lib.get_dev())
         trainloader.dataset.transform = transform_bak
     
     top1 = 0.
     top5 = 0.
     end = time.time()
     with torch.no_grad():
-        retrieval_one_hot = torch.zeros(K, C).cuda()
+        retrieval_one_hot = torch.zeros(K, C).to(lib.get_dev())
         for batch_idx, (inputs, targets, indexes) in enumerate(testloader):
             end = time.time()
-            targets = targets.cuda(async=True)
+            #targets = targets.cuda(async=True)
+            targets = targets.to(lib.get_dev())
             batchSize = inputs.size(0)
-            features = net(inputs)
+            features = net(inputs.to(lib.get_dev()))
             net_time.update(time.time() - end)
             end = time.time()
 
