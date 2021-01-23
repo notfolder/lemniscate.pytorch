@@ -12,6 +12,8 @@ class DatasetZip(torch.utils.data.Dataset):
         self.df = pd.read_csv(csv_file)
 
         self.datanum = len(self.df)
+        self.train_labels = self.df['label']
+
 
     def __len__(self):
         return self.datanum
@@ -30,12 +32,13 @@ class DatasetZip(torch.utils.data.Dataset):
                 im_g = Image.open(img_file_g).convert('L')
             with zip_file.open(filename_b) as img_file_b:
                 im_b = Image.open(img_file_b).convert('L')
-        out_data = np.array(Image.merge('RGB',(im_r,im_g,im_b)))
+#        out_data = np.array(Image.merge('RGB',(im_r,im_g,im_b)))
+        out_data = Image.merge('RGB',(im_r,im_g,im_b))
 
         if self.transform:
             out_data = self.transform(out_data)
 
-        return out_data, out_label
+        return (out_data, out_label, idx)
     
     def get_labels(self):
         return self.df['label']

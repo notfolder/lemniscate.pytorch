@@ -13,6 +13,8 @@ class DatasetTiff(torch.utils.data.Dataset):
 
         self.datanum = len(self.df)
 
+        self.train_labels = self.df['label']
+
     def __len__(self):
         return self.datanum
 
@@ -36,14 +38,14 @@ class DatasetTiff(torch.utils.data.Dataset):
         im_b = np.array(img.copy().resize((128,128)).convert('L'))
         im_b = (im_b - im_b.mean()) / im_b.std()
         im_b = Image.fromarray((im_b*64 + 128).clip(0,255)).convert('L')
-        out_data = np.array(Image.merge('RGB',(im_r,im_g,im_b)))
-        #out_data = Image.merge('RGB',(im_r,im_g,im_b))
+        #out_data = np.array(Image.merge('RGB',(im_r,im_g,im_b)))
+        out_data = Image.merge('RGB',(im_r,im_g,im_b))
         #out_data = torch.tensor(out_data)
 
         if self.transform:
             out_data = self.transform(out_data)
 
-        return (out_data, out_label)
+        return (out_data, out_label, idx)
     
     def get_labels(self):
         return self.df['label']
