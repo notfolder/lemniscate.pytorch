@@ -14,6 +14,11 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
 
+import dataset_tiff
+import dataset_zip
+
+import lib
+
 import datasets
 import models
 import math
@@ -29,8 +34,8 @@ model_names = sorted(name for name in models.__dict__
     and callable(models.__dict__[name]))
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-parser.add_argument('data', metavar='DIR',
-                    help='path to dataset')
+#parser.add_argument('data', metavar='DIR',
+#                    help='path to dataset')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
                     choices=model_names,
                     help='model architecture: ' +
@@ -108,13 +113,23 @@ def main():
 
 
     # Data loading code
-    traindir = os.path.join(args.data, 'train')
-    valdir = os.path.join(args.data, 'val')
+#    traindir = os.path.join(args.data, 'train')
+#    valdir = os.path.join(args.data, 'val')
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
-    train_dataset = datasets.ImageFolderInstance(
-        traindir,
+#    train_dataset = datasets.ImageFolderInstance(
+#        traindir,
+#        transforms.Compose([
+#            transforms.RandomResizedCrop(224, scale=(0.2,1.)),
+#            transforms.RandomGrayscale(p=0.2),
+#            transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
+#            transforms.RandomHorizontalFlip(),
+#            transforms.ToTensor(),
+#            normalize,
+#        ]))
+    train_dataset = dataset_tiff.DatasetTiff(
+        "./data-tiff/dataset-tiff.csv",
         transforms.Compose([
             transforms.RandomResizedCrop(224, scale=(0.2,1.)),
             transforms.RandomGrayscale(p=0.2),
@@ -133,13 +148,24 @@ def main():
         train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
-    val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolderInstance(valdir, transforms.Compose([
+    val_dataset = dataset_zip.DatasetZip(
+        "./data-zip/dataset-zip.csv",
+        transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
             normalize,
-        ])),
+        ])
+        )
+
+    val_loader = torch.utils.data.DataLoader(
+#        datasets.ImageFolderInstance(valdir, transforms.Compose([
+#            transforms.Resize(256),
+#            transforms.CenterCrop(224),
+#            transforms.ToTensor(),
+#            normalize,
+#        ])),
+        val_dataset,
         batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
 
