@@ -14,6 +14,7 @@ class DatasetTiff(torch.utils.data.Dataset):
         self.datanum = len(self.df)
 
         self.train_labels = self.df['label']
+        self.targets = self.df['label']
 
     def __len__(self):
         return self.datanum
