@@ -24,6 +24,7 @@ from lib.NCEAverage import NCEAverage
 from lib.LinearAverage import LinearAverage
 from lib.NCECriterion import NCECriterion
 from lib.utils import AverageMeter
+from lib.FeatureDecorrelation import FeatureDecorrelation
 import lib
 from test import NN, kNN
 
@@ -109,9 +110,12 @@ if hasattr(lemniscate, 'K'):
 else:
     criterion = nn.CrossEntropyLoss()
 
+FD = FeatureDecorrelation(args.low_dim, tau2=2.0)
+
 net.to(device)
 lemniscate.to(device)
 criterion.to(device)
+FD.to(device)
 
 if args.test_only:
     acc = kNN(0, net, lemniscate, trainloader, testloader, 200, args.nce_t, 1)
@@ -154,23 +158,24 @@ def train(epoch):
         ######
         # for FD
         ######
-        low_dim = torch.tensor(args.low_dim).to(device)
-        Vt = torch.t(features)
+        #low_dim = torch.tensor(args.low_dim).to(device)
+        #Vt = torch.t(features)
         #print(Vt.shape)
         #print(Vt[0].shape)
-        Lf = torch.tensor(0.0).to(device)
-        for l in range(low_dim):
-            fl_t = torch.t(Vt[l])
-            first = -(torch.dot(fl_t, Vt[l]))/tau2
-            sum_second = torch.tensor(0.0).to(device)
-            for j in range(low_dim):
-                fj_t = torch.t(Vt[j])
-                sum_second += torch.exp(torch.dot(fj_t, Vt[l])/tau2)
-            second = torch.log(sum_second)
-            Lf += first + second
+        #Lf = torch.tensor(0.0).to(device)
+        #for l in range(low_dim):
+        #    fl_t = torch.t(Vt[l])
+        #    first = -(torch.dot(fl_t, Vt[l]))/tau2
+        #    sum_second = torch.tensor(0.0).to(device)
+        #    for j in range(low_dim):
+        #        fj_t = torch.t(Vt[j])
+        #        sum_second += torch.exp(torch.dot(fj_t, Vt[l])/tau2)
+        #    second = torch.log(sum_second)
+        #    Lf += first + second
 
         outputs = lemniscate(features, indexes)
-        loss = criterion(outputs, indexes) + alpha*Lf
+        #loss = criterion(outputs, indexes)
+        loss = criterion(outputs, indexes) + alpha*FD(features)
 
         loss.backward()
         optimizer.step()
