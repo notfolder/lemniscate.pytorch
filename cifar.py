@@ -178,7 +178,9 @@ def train(epoch):
         #outputs = lemniscate(features, indexes)
         #loss = criterion(outputs, indexes)
         #loss = criterion(outputs, indexes) + alpha*FD(features)
-        loss = ID(features) + alpha*FD(features)
+        id = ID(features)
+        fd = FD(features)
+        loss = id + alpha*fd
 
         loss.backward()
         optimizer.step()
@@ -192,8 +194,10 @@ def train(epoch):
         print('Epoch: [{}][{}/{}]'
               'Time: {batch_time.val:.3f} ({batch_time.avg:.3f}) '
               'Data: {data_time.val:.3f} ({data_time.avg:.3f}) '
+
+              'IDFD: ID={ID:.3f} FD={FD:.3f} '
               'Loss: {train_loss.val:.4f} ({train_loss.avg:.4f})'.format(
-              epoch, batch_idx, len(trainloader), batch_time=batch_time, data_time=data_time, train_loss=train_loss))
+              epoch, batch_idx, len(trainloader), batch_time=batch_time, data_time=data_time, train_loss=train_loss, ID=id, FD=fd))
 
 for epoch in range(start_epoch, start_epoch+200):
     train(epoch)
