@@ -9,6 +9,20 @@ class FeatureDecorrelation(nn.Module):
 
     def forward(self, features):
         Vt = torch.t(features)
+        old = self.forward_old(features)
+        Lf = 0.0
+        first = torch.sum(-torch.pow(Vt, 2)/self.tau2)
+        inner_product = torch.mm(Vt, features)/self.tau2
+        #print(inner_product.shape)
+        second = torch.logsumexp(inner_product, 1)
+        #print(second.shape)
+        Lf = first + torch.sum(second)
+        print(old)
+        print(Lf)
+        return Lf
+
+    def forward_old(self, features):
+        Vt = torch.t(features)
         #Lf = torch.tensor(0.0)
         Lf = 0.0
         for l in range(self.low_dim):
