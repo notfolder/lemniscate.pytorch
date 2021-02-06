@@ -67,10 +67,10 @@ transform_test = transforms.Compose([
 trainset = datasets.CIFAR10Instance(root='./data', train=True, download=True, transform=transform_train)
 if device == 'cpu':
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
+    #trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
 else:
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True, num_workers=2)
+    #trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True, num_workers=2)
 
 testset = datasets.CIFAR10Instance(root='./data', train=False, download=True, transform=transform_test)
 if device == 'cpu':
