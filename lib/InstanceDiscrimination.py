@@ -26,8 +26,8 @@ class InstanceDiscrimination(nn.Module):
         #    Li += torch.log(num/den[i])
         #print((den/num).shape)
         Li = torch.sum(torch.log(den/num))
-        print(old)
-        print(Li)
+        #print(old)
+        #print(Li)
         return Li
 
     def forward_old(self, features):
