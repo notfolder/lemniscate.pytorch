@@ -2,14 +2,15 @@ import torch
 from torch import nn
 
 class InstanceDiscrimination(nn.Module):
-    def __init__(self, tau):
+    def __init__(self, tau, device):
         super(InstanceDiscrimination, self).__init__()
         self.tau = tau
         self.ce_loss = nn.CrossEntropyLoss(reduction='sum')
+        self.device = device
 
     def forward(self, features):
         #print(features.shape)
-        old = self.forward_old(features)
+        #old = self.forward_old(features)
         v = features
         n = features.shape[0]
         #Li = 0.0
@@ -28,9 +29,9 @@ class InstanceDiscrimination(nn.Module):
         #numerator = torch.exp(torch.sum(torch.pow(v,2), dim=1)/self.tau)
         #denominator = torch.sum(torch.exp(torch.mm(v, torch.t(v))/self.tau), dim=0)
         #Li = -torch.sum(torch.log(numerator/denominator))
-        Li = self.ce_loss(torch.mm(v, torch.t(v))/self.tau, torch.tensor(range(n)))
-        print(old)
-        print(Li)
+        Li = self.ce_loss(torch.mm(v, torch.t(v))/self.tau, torch.tensor(range(n)).to(self.device))
+        #print(old)
+        #print(Li)
         return Li
 
     def forward_old(self, features):
