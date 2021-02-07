@@ -30,6 +30,7 @@ import lib
 from test import NN, kNN
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
+parser.add_argument('--mode', default='ID_CE_FD', choices=['ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'], help='learning rate')
 parser.add_argument('--lr', default=0.03, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', default='', type=str, help='resume from checkpoint')
 parser.add_argument('--test-only', action='store_true', help='test only')
@@ -150,6 +151,7 @@ def train(epoch):
     alpha = torch.tensor(1.0).to(device)
 
     end = time.time()
+    print(args.mode)
     for batch_idx, (inputs, targets, indexes) in enumerate(trainloader):
         data_time.update(time.time() - end)
         inputs, targets, indexes = inputs.to(device), targets.to(device), indexes.to(device)
@@ -178,9 +180,22 @@ def train(epoch):
         #outputs = lemniscate(features, indexes)
         #loss = criterion(outputs, indexes)
         #loss = criterion(outputs, indexes) + alpha*FD(features)
-        id = ID(features)
-        fd = FD(features)
-        loss = id + alpha*fd
+
+        # 'ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'
+        if args.mode == 'ID_CE_FD':
+            id = ID(features)
+            fd = FD(features)
+            loss = id + alpha*fd
+        elif args.mode == 'ID_NCE_FD':
+            outputs = lemniscate(features, indexes)
+            loss = criterion(outputs, indexes) + alpha*FD(features)
+        elif args.mode == 'ID':
+            loss = ID(features)
+        elif args.mode == 'NCE':
+            outputs = lemniscate(features, indexes)
+            loss = criterion(outputs, indexes)
+        else:
+            raise AssertionError('mode choice')
 
         loss.backward()
         optimizer.step()
@@ -194,10 +209,8 @@ def train(epoch):
         print('Epoch: [{}][{}/{}]'
               'Time: {batch_time.val:.3f} ({batch_time.avg:.3f}) '
               'Data: {data_time.val:.3f} ({data_time.avg:.3f}) '
-
-              'IDFD: ID={ID:.3f} FD={FD:.3f} '
               'Loss: {train_loss.val:.4f} ({train_loss.avg:.4f})'.format(
-              epoch, batch_idx, len(trainloader), batch_time=batch_time, data_time=data_time, train_loss=train_loss, ID=id, FD=fd))
+              epoch, batch_idx, len(trainloader), batch_time=batch_time, data_time=data_time, train_loss=train_loss))
 
 for epoch in range(start_epoch, start_epoch+200):
     train(epoch)
