@@ -5,15 +5,15 @@ class InstanceDiscrimination(nn.Module):
     def __init__(self, tau):
         super(InstanceDiscrimination, self).__init__()
         self.tau = tau
+        self.ce_loss = nn.CrossEntropyLoss(reduction='sum')
 
     def forward(self, features):
         #print(features.shape)
-        #old = self.forward_old(features)
+        old = self.forward_old(features)
         v = features
         n = features.shape[0]
         #Li = 0.0
-        den = torch.sum(torch.exp(torch.mm(v, torch.t(v))/self.tau), dim=0)
-        num = torch.exp(torch.sum(torch.pow(v,2), dim=1)/self.tau)
+
         #print(den.shape)
         #print(num.shape)
         #for i in range(n):
@@ -25,9 +25,12 @@ class InstanceDiscrimination(nn.Module):
             #print(den[i])
         #    Li += torch.log(num/den[i])
         #print((den/num).shape)
-        Li = torch.sum(torch.log(den/num))
-        #print(old)
-        #print(Li)
+        numerator = torch.exp(torch.sum(torch.pow(v,2), dim=1)/self.tau)
+        denominator = torch.sum(torch.exp(torch.mm(v, torch.t(v))/self.tau), dim=0)
+        Li = -torch.sum(torch.log(numerator/denominator))
+        #Li = nn.CrossEntropyLoss(torch.mm(v, torch.t(v))/self.tau, torch.t(v))
+        print(old)
+        print(Li)
         return Li
 
     def forward_old(self, features):
