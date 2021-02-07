@@ -8,7 +8,7 @@ class InstanceDiscrimination(nn.Module):
 
     def forward(self, features):
         #print(features.shape)
-        old = self.forward_old(features)
+        #old = self.forward_old(features)
         v = features
         n = features.shape[0]
         #Li = 0.0
