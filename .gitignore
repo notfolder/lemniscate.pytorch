@@ -1,7 +1,7 @@
 data/*
 checkpoint/*
 logs/*
-.venv
+.venv*
 
 *.pyc
 *.bak

@@ -2,17 +2,16 @@ import torch
 from torch import nn
 
 class InstanceDiscrimination(nn.Module):
-    def __init__(self, tau, device):
+    def __init__(self, tau):
         super(InstanceDiscrimination, self).__init__()
         self.tau = tau
         self.ce_loss = nn.CrossEntropyLoss(reduction='sum')
-        self.device = device
 
     def forward(self, features):
         #print(features.shape)
         #old = self.forward_old(features)
         v = features
-        n = features.shape[0]
+        n = torch.tensor(features.shape[0]).to(features.device)
         #Li = 0.0
 
         #print(den.shape)
@@ -26,10 +25,10 @@ class InstanceDiscrimination(nn.Module):
             #print(den[i])
         #    Li += torch.log(num/den[i])
         #print((den/num).shape)
-        #numerator = torch.exp(torch.sum(torch.pow(v,2), dim=1)/self.tau)
-        #denominator = torch.sum(torch.exp(torch.mm(v, torch.t(v))/self.tau), dim=0)
-        #Li = -torch.sum(torch.log(numerator/denominator))
-        Li = self.ce_loss(torch.mm(v, torch.t(v))/self.tau, torch.tensor(range(n)).to(self.device))
+        numerator = torch.exp(torch.sum(torch.pow(v,2), dim=1)/self.tau)
+        denominator = torch.sum(torch.exp(torch.mm(v, torch.t(v))/self.tau), dim=0)
+        Li = -torch.sum(torch.log(numerator/denominator))/n
+        #Li = self.ce_loss(torch.mm(v, torch.t(v))/self.tau, torch.tensor(range(n)).to(self.device))
         #print(old)
         #print(Li)
         return Li

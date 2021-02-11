@@ -112,7 +112,7 @@ if hasattr(lemniscate, 'K'):
 else:
     criterion = nn.CrossEntropyLoss()
 
-ID = InstanceDiscrimination(tau=1.0, device=device)
+ID = InstanceDiscrimination(tau=1.0)
 FD = FeatureDecorrelation(args.low_dim, tau2=2.0)
 
 net.to(device)
