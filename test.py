@@ -140,3 +140,18 @@ def kNN(epoch, net, lemniscate, trainloader, testloader, K, sigma, recompute_mem
 
     return top1/total
 
+from sklearn.cluster import KMeans
+
+def kmeans(net, testloader):
+    kmeans= KMeans(n_clusters=10)
+    #pred = kmeans.fit_predict()
+    with torch.no_grad():
+        features_all = []
+        for batch_idx, (inputs, targets, indexes) in enumerate(testloader):
+            targets = targets.to(lib.get_dev())
+            batchSize = inputs.size(0)
+            features = net(inputs.to(lib.get_dev()))
+            print(features.shape)
+            features_all.append(features)
+        features_all = torch.cat(features_all, 0)
+        print(features.shape)
