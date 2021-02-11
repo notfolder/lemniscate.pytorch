@@ -27,7 +27,7 @@ class InstanceDiscrimination(nn.Module):
         #print((den/num).shape)
         numerator = torch.exp(torch.sum(torch.pow(v,2), dim=1)/self.tau)
         denominator = torch.sum(torch.exp(torch.mm(v, torch.t(v))/self.tau), dim=0)
-        Li = -torch.sum(torch.log(numerator/denominator))/n
+        Li = -torch.sum(torch.log(numerator/denominator))
         #Li = self.ce_loss(torch.mm(v, torch.t(v))/self.tau, torch.tensor(range(n)).to(self.device))
         #print(old)
         #print(Li)
