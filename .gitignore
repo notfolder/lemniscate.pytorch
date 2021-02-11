@@ -1,10 +1,10 @@
 data/*
 checkpoint/*
 logs/*
-.venv*
+.*
 
 *.pyc
 *.bak
-*.log
+#*.log
 *.tar
 *.pth
