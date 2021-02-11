@@ -141,17 +141,25 @@ def kNN(epoch, net, lemniscate, trainloader, testloader, K, sigma, recompute_mem
     return top1/total
 
 from sklearn.cluster import KMeans
+from sklearn.metrics import normalized_mutual_info_score
 
 def kmeans(net, testloader):
     kmeans= KMeans(n_clusters=10)
     #pred = kmeans.fit_predict()
     with torch.no_grad():
         features_all = []
+        targets_all = []
         for batch_idx, (inputs, targets, indexes) in enumerate(testloader):
             targets = targets.to(lib.get_dev())
             batchSize = inputs.size(0)
             features = net(inputs.to(lib.get_dev()))
-            print(features.shape)
             features_all.append(features)
+            targets_all.append(targets)
         features_all = torch.cat(features_all, 0)
-        print(features.shape)
+        targets_all = torch.cat(targets_all, 0)
+        features_all = features_all.to('cpu').detach().numpy().copy()
+        targets_all = targets_all.to('cpu').detach().numpy().copy()
+        pred = kmeans.fit_predict(features_all)
+#        print(pred.shape)
+#        print(targets_all.shape)
+    return normalized_mutual_info_score(targets_all, pred)

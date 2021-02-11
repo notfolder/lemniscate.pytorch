@@ -27,7 +27,7 @@ from lib.utils import AverageMeter
 from lib.FeatureDecorrelation import FeatureDecorrelation
 from lib.InstanceDiscrimination import InstanceDiscrimination
 import lib
-from test import NN, kNN, kmeans
+from test import NN, kNN,kmeans
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--mode', default='ID_CE_FD', choices=['ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'], help='learning rate')
@@ -214,8 +214,8 @@ def train(epoch):
 
 for epoch in range(start_epoch, start_epoch+200):
     train(epoch)
+    #acc = kNN(epoch, net, lemniscate, trainloader, testloader, 200, args.nce_t, 0)
     acc = kmeans(net, testloader)
-    acc = kNN(epoch, net, lemniscate, trainloader, testloader, 200, args.nce_t, 0)
     print('epoch_result: {:.3f}'.format(acc*100))
 
     if acc > best_acc:
