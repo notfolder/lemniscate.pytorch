@@ -141,7 +141,18 @@ def kNN(epoch, net, lemniscate, trainloader, testloader, K, sigma, recompute_mem
     return top1/total
 
 from sklearn.cluster import KMeans
-from sklearn.metrics import normalized_mutual_info_score
+from sklearn.metrics import accuracy_score
+from sklearn.metrics.cluster import adjusted_rand_score
+from sklearn.metrics.cluster import normalized_mutual_info_score
+
+def acc_score(label_true, label_pred):
+    dic = {}
+    for i in np.unique(label_pred):
+        dic[i] = np.argmax(np.bincount(label_true[label_pred == i]))
+    v = np.array(list(dic.values()))
+    sidx = np.searchsorted(list(dic), label_pred)
+    acc = accuracy_score(label_true, v[sidx])
+    return acc
 
 def kmeans(net, testloader):
     kmeans= KMeans(n_clusters=10)
@@ -162,4 +173,4 @@ def kmeans(net, testloader):
         pred = kmeans.fit_predict(features_all)
 #        print(pred.shape)
 #        print(targets_all.shape)
-    return normalized_mutual_info_score(targets_all, pred)
+    return acc_score(targets_all, pred), normalized_mutual_info_score(targets_all, pred), adjusted_rand_score(targets_all, pred)

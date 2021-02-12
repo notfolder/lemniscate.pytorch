@@ -129,8 +129,8 @@ optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5
 def adjust_learning_rate(optimizer, epoch):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
     lr = args.lr
-    if epoch >= 80:
-        lr = args.lr * (0.1 ** ((epoch-80) // 40))
+    if epoch >= 600:
+        lr = args.lr * (0.1 ** ((epoch-600) // 350))
     print(lr)
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
@@ -212,11 +212,11 @@ def train(epoch):
               'Loss: {train_loss.val:.4f} ({train_loss.avg:.4f})'.format(
               epoch, batch_idx, len(trainloader), batch_time=batch_time, data_time=data_time, train_loss=train_loss))
 
-for epoch in range(start_epoch, start_epoch+200):
+for epoch in range(start_epoch, start_epoch+2000):
     train(epoch)
     #acc = kNN(epoch, net, lemniscate, trainloader, testloader, 200, args.nce_t, 0)
-    acc = kmeans(net, testloader)
-    print('epoch_result: {:.3f}'.format(acc*100))
+    acc, nmi, ari = kmeans(net, testloader)
+    print('epoch_result: {:.3f} {:.3f} {:.3f}'.format(acc, nmi, ari))
 
     if acc > best_acc:
         print('Saving..')
