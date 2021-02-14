@@ -1,14 +1,16 @@
 import torch
 from torch import nn
+from lib.normalize import Normalize
 
 class FeatureDecorrelation(nn.Module):
     def __init__(self, low_dim, tau2):
         super(FeatureDecorrelation, self).__init__()
         self.low_dim = low_dim
         self.tau2 = tau2
+        self.l2norm = Normalize(2)
 
     def forward(self, features):
-        Vt = torch.t(features)
+        Vt = self.l2norm(torch.t(features))
         #old = self.forward_old(features)
         #Lf = 0.0
         first = -torch.pow(Vt, 2)/self.tau2
