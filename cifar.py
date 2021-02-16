@@ -30,7 +30,7 @@ import lib
 from test import NN, kNN,kmeans
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
-parser.add_argument('--mode', default='ID_CE_FD', choices=['ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'], help='learning rate')
+parser.add_argument('--mode', default='ID_NCE_FD', choices=['ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'], help='learning rate')
 parser.add_argument('--lr', default=0.03, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', default='', type=str, help='resume from checkpoint')
 parser.add_argument('--test-only', action='store_true', help='test only')
@@ -90,6 +90,7 @@ if args.nce_k > 0:
     lemniscate = NCEAverage(args.low_dim, ndata, args.nce_k, args.nce_t, args.nce_m, None, lib.get_dev())
 else:
     lemniscate = LinearAverage(args.low_dim, ndata, args.nce_t, args.nce_m)
+LA = LinearAverage(args.low_dim, ndata, args.nce_t, args.nce_m)
 
 if device == 'cuda':
 #    net = torch.nn.DataParallel(net, device_ids=range(torch.cuda.device_count()))
@@ -111,6 +112,7 @@ if hasattr(lemniscate, 'K'):
     criterion = NCECriterion(ndata)
 else:
     criterion = nn.CrossEntropyLoss()
+CE = nn.CrossEntropyLoss()
 
 ID = InstanceDiscrimination(tau=1.0)
 FD = FeatureDecorrelation(args.low_dim, tau2=2.0)
@@ -118,7 +120,10 @@ FD = FeatureDecorrelation(args.low_dim, tau2=2.0)
 net.to(device)
 lemniscate.to(device)
 criterion.to(device)
+ID.to(device)
 FD.to(device)
+LA.to(device)
+CE.to(device)
 
 if args.test_only:
     acc = kNN(0, net, lemniscate, trainloader, testloader, 200, args.nce_t, 1)
@@ -183,12 +188,18 @@ def train(epoch):
 
         # 'ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'
         if args.mode == 'ID_CE_FD':
-            id = ID(features)
+#            id = ID(features)
+            outputs = LA(features, indexes)
+            id = CE(outputs, indexes)
             fd = FD(features)
+            print(f'ID: {id} FD: {fd}')
             loss = id + alpha*fd
         elif args.mode == 'ID_NCE_FD':
             outputs = lemniscate(features, indexes)
-            loss = criterion(outputs, indexes) + alpha*FD(features)
+            id = criterion(outputs, indexes)
+            fd = FD(features)
+            loss = id + alpha*fd
+            print(f'ID: {id} FD: {fd}')
         elif args.mode == 'ID':
             loss = ID(features)
         elif args.mode == 'NCE':
