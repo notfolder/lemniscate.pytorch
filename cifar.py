@@ -71,8 +71,8 @@ if device == 'cpu':
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True)
     #trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
 else:
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
-    #trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True, num_workers=2)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=4)
+    #trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True, num_workers=4)
 
 testset = datasets.CIFAR10Instance(root='./data', train=False, download=True, transform=transform_test)
 if device == 'cpu':
@@ -163,24 +163,6 @@ def train(epoch):
         optimizer.zero_grad()
 
         features = net(inputs)
-
-        ######
-        # for FD
-        ######
-        #low_dim = torch.tensor(args.low_dim).to(device)
-        #Vt = torch.t(features)
-        #print(Vt.shape)
-        #print(Vt[0].shape)
-        #Lf = torch.tensor(0.0).to(device)
-        #for l in range(low_dim):
-        #    fl_t = torch.t(Vt[l])
-        #    first = -(torch.dot(fl_t, Vt[l]))/tau2
-        #    sum_second = torch.tensor(0.0).to(device)
-        #    for j in range(low_dim):
-        #        fj_t = torch.t(Vt[j])
-        #        sum_second += torch.exp(torch.dot(fj_t, Vt[l])/tau2)
-        #    second = torch.log(sum_second)
-        #    Lf += first + second
 
         #outputs = lemniscate(features, indexes)
         #loss = criterion(outputs, indexes)

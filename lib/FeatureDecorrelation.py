@@ -12,16 +12,15 @@ class FeatureDecorrelation(nn.Module):
     def forward(self, features):
         #Vt = self.l2norm(torch.t(features))
         Vt = torch.t(features)
-        #old = self.forward_old(features)
         #Lf = 0.0
-        first = -torch.pow(Vt, 2)/self.tau2
+        first = -torch.sum(torch.pow(Vt, 2), 1)/self.tau2
         inner_product = torch.mm(Vt, features)/self.tau2
         #print(inner_product.shape)
         second = torch.logsumexp(inner_product, 1)
-        #print(second.shape)
         Lf = torch.mean(first + second)
-        #print(old)
-        #print(Lf)
+        old = self.forward_old(features) / self.low_dim
+        print(old)
+        print(Lf)
         return Lf
 
     def forward_old(self, features):
