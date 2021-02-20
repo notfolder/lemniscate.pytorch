@@ -19,7 +19,7 @@ class FeatureDecorrelation(nn.Module):
         #print(inner_product.shape)
         second = torch.logsumexp(inner_product, 1)
         #print(second.shape)
-        Lf = torch.sum(first) + torch.sum(second)
+        Lf = torch.average(first + second)
         #print(old)
         #print(Lf)
         return Lf

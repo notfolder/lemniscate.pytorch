@@ -135,7 +135,7 @@ def adjust_learning_rate(optimizer, epoch):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
     lr = args.lr
     if epoch >= 600:
-        lr = args.lr * (0.1 ** ((epoch-600) // 350))
+        lr = args.lr * (0.1 ** ((epoch-250) // 350))
     print(lr)
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
@@ -247,5 +247,6 @@ for epoch in range(start_epoch, start_epoch+2000):
 
     print('best accuracy: {:.2f}'.format(best_acc*100))
 
-acc = kNN(0, net, lemniscate, trainloader, testloader, 200, args.nce_t, 1)
-print('last accuracy: {:.2f}'.format(acc*100))
+#acc = kNN(0, net, lemniscate, trainloader, testloader, 200, args.nce_t, 1)
+acc, nmi, ari = kmeans(net, testloader)
+print('last_result: {:.3f} {:.3f} {:.3f}'.format(acc, nmi, ari))
