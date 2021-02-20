@@ -18,9 +18,9 @@ class FeatureDecorrelation(nn.Module):
         #print(inner_product.shape)
         second = torch.logsumexp(inner_product, 1)
         Lf = torch.mean(first + second)
-        old = self.forward_old(features) / self.low_dim
-        print(old)
-        print(Lf)
+        #old = self.forward_old(features) / self.low_dim
+        #print(old)
+        #print(Lf)
         return Lf
 
     def forward_old(self, features):
