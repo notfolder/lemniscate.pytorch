@@ -30,7 +30,7 @@ import lib
 from test import NN, kNN,kmeans
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
-parser.add_argument('--mode', default='ID', choices=['ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'], help='learning rate')
+parser.add_argument('--mode', default='ID_CE_FD', choices=['ID_CE_FD', 'ID_NCE_FD', 'ID', 'NCE'], help='learning rate')
 parser.add_argument('--lr', default=0.03, type=float, help='learning rate')
 parser.add_argument('--resume', '-r', default='', type=str, help='resume from checkpoint')
 parser.add_argument('--test-only', action='store_true', help='test only')
@@ -78,7 +78,7 @@ testset = datasets.CIFAR10Instance(root='./data', train=False, download=True, tr
 if device == 'cpu':
     testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False)
 else:
-    testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=4)
 
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 ndata = trainset.__len__()
