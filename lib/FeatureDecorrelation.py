@@ -10,7 +10,6 @@ class FeatureDecorrelation(nn.Module):
         self.tau2 = torch.tensor(tau2)
         self.l2norm = Normalize(2)
         self.seq = torch.tensor(torch.range(0, low_dim-1), dtype=torch.long)
-        self.ce = torch.nn.CrossEntropyLoss().to(get_dev())
 
     def forward(self, features):
         #Vt = torch.t(features)
@@ -21,7 +20,7 @@ class FeatureDecorrelation(nn.Module):
         #second = torch.logsumexp(inner_product, 1)
         #Lf = torch.sum(first + second)
         #Lf = torch.mean(first + second)
-        Lf = self.ce(inner_product, self.seq)
+        Lf = torch.nn.functional.cross_entropy(inner_product, self.seq)
         #old = self.forward_old(features)
         #print(old)
         #print(Lf)
