@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from lib.normalize import Normalize
+from lib import get_dev
 
 class FeatureDecorrelation(nn.Module):
     def __init__(self, low_dim, tau2):
@@ -9,7 +10,7 @@ class FeatureDecorrelation(nn.Module):
         self.tau2 = torch.tensor(tau2)
         self.l2norm = Normalize(2)
         self.seq = torch.tensor(torch.range(0, low_dim-1), dtype=torch.long)
-        self.ce = torch.nn.CrossEntropyLoss()
+        self.ce = torch.nn.CrossEntropyLoss().to(get_dev())
 
     def forward(self, features):
         #Vt = torch.t(features)
