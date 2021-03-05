@@ -144,6 +144,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
 from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.metrics.cluster import normalized_mutual_info_score
+from sklearn.metrics import confusion_matrix
+from scipy.optimize import linear_sum_assignment
 
 def acc_score(label_true, label_pred):
     cm = confusion_matrix(label_true, label_pred)
