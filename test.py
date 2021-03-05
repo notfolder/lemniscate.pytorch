@@ -146,13 +146,20 @@ from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.metrics.cluster import normalized_mutual_info_score
 
 def acc_score(label_true, label_pred):
-    dic = {}
-    for i in np.unique(label_pred):
-        dic[i] = np.argmax(np.bincount(label_true[label_pred == i]))
-    v = np.array(list(dic.values()))
-    sidx = np.searchsorted(list(dic), label_pred)
-    acc = accuracy_score(label_true, v[sidx])
+    cm = confusion_matrix(label_true, label_pred)
+    row_idx, col_idx = linear_sum_assignment(-cm + np.max(cm))
+    cm2 = cm[np.ix_(row_idx, col_idx)]
+    acc = np.trace(cm2)/np.sum(cm2)
     return acc
+
+#def acc_score(label_true, label_pred):
+#    dic = {}
+#    for i in np.unique(label_pred):
+#        dic[i] = np.argmax(np.bincount(label_true[label_pred == i]))
+#    v = np.array(list(dic.values()))
+#    sidx = np.searchsorted(list(dic), label_pred)
+#    acc = accuracy_score(label_true, v[sidx])
+#    return acc
 
 #def acc_score(y_true, y_pred):
 #    """

@@ -9,22 +9,29 @@ class FeatureDecorrelation(nn.Module):
         self.low_dim = torch.tensor(low_dim)
         self.tau2 = torch.tensor(tau2)
         self.l2norm = Normalize(2)
-        #self.seq = torch.tensor(torch.range(0, low_dim-1), dtype=torch.long).to(get_dev())
-        #self.ce = torch.nn.CrossEntropyLoss()
+        self.ce = torch.nn.CrossEntropyLoss()
+#        self.seq = torch.tensor(torch.range(0, low_dim-1), dtype=torch.long).to(get_dev())
+        self.seq = torch.arange(low_dim, dtype=torch.long, device=get_dev())
 
     def forward(self, features):
         #Vt = torch.t(features)
-        Vt = self.l2norm(torch.t(features))
-        first = -torch.sum(torch.pow(Vt, 2), 1)/self.tau2
-        inner_product = torch.mm(Vt, features)/self.tau2
-        #print(inner_product.shape)
-        second = torch.logsumexp(inner_product, 1)
-        #Lf = torch.sum(first + second)
-        Lf = torch.mean(first + second)
+        #Vt = self.l2norm(torch.t(features))
+        Vt = torch.t(features[:, :self.low_dim])
+        Vt = self.l2norm(Vt)
+        #first = -torch.sum(torch.pow(Vt, 2), 1)/self.tau2
+        #inner_product = torch.mm(Vt, features)/self.tau2
+        #v#print(inner_product.shape)
+        #second = torch.logsumexp(inner_product, 0)
+        ##Lf = torch.sum(first + second)
+        #Lf = torch.mean(first + second)
         #Lf = self.ce(inner_product, self.seq)
         #old = self.forward_old(features)
         #print(old)
         #print(Lf)
+
+        #first = -torch.sum(torch.pow(Vt,2), 1) / self.tau2
+        #second = torch.logsumexp(torch.mm(Vt, toch.t(Vt))/self.tau2, 0)
+        Lf = self.ce(torch.mm(Vt, torch.t(Vt))/self.tau2, self.seq)
         return Lf
 
     def forward_old(self, features):
